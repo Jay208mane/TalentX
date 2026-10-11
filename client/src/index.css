@@ -1,0 +1,121 @@
+:root {
+  /* Typography */
+  --tx-font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --tx-font-display: 'Outfit', 'Inter', sans-serif;
+
+  /* Brand Palette - Upwork Inspired Green & Crisp Charcoal */
+  --tx-green: #108a00;
+  --tx-green-hover: #14a800;
+  --tx-green-dark: #0e6e00;
+  --tx-green-light: #f0f9ef;
+  --tx-green-subtle: #e6f6e5;
+  --tx-green-border: #bce5b7;
+
+  /* Neutrals & Charcoal */
+  --tx-charcoal: #001e00;
+  --tx-slate-900: #0f172a;
+  --tx-slate-800: #1e293b;
+  --tx-slate-700: #334155;
+  --tx-slate-600: #475569;
+  --tx-slate-500: #64748b;
+  --tx-slate-400: #94a3b8;
+  --tx-slate-300: #cbd5e1;
+  --tx-slate-200: #e2e8f0;
+  --tx-slate-100: #f1f5f9;
+  --tx-slate-50: #f8fafc;
+  --tx-white: #ffffff;
+
+  /* Status Colors */
+  --tx-success: #108a00;
+  --tx-warning: #f59e0b;
+  --tx-danger: #dc2626;
+  --tx-info: #2563eb;
+
+  /* Radii */
+  --tx-radius-xs: 4px;
+  --tx-radius-sm: 6px;
+  --tx-radius-md: 10px;
+  --tx-radius-lg: 14px;
+  --tx-radius-xl: 20px;
+  --tx-radius-pill: 9999px;
+
+  /* Shadows */
+  --tx-shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.04);
+  --tx-shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.08);
+  --tx-shadow-md: 0 4px 12px rgba(15, 23, 42, 0.06);
+  --tx-shadow-lg: 0 10px 25px rgba(15, 23, 42, 0.08);
+  --tx-shadow-hover: 0 8px 24px rgba(16, 138, 0, 0.12);
+
+  /* Transitions */
+  --tx-transition-fast: 0.15s ease;
+  --tx-transition-normal: 0.25s ease;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  min-width: 320px;
+  min-height: 100%;
+  scroll-behavior: smooth;
+  font-size: 16px;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  font-family: var(--tx-font-sans);
+  color: var(--tx-slate-800);
+  background-color: var(--tx-white);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Base typography */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--tx-font-display);
+  color: var(--tx-slate-900);
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+}
+
+p {
+  color: var(--tx-slate-600);
+  line-height: 1.6;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+  transition: color var(--tx-transition-fast);
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-family: inherit;
+  transition: all var(--tx-transition-fast);
+}
+
+input, textarea, select {
+  font-family: inherit;
+  color: inherit;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Accessibility */
+:focus-visible {
+  outline: 2px solid var(--tx-green);
+  outline-offset: 2px;
+}
