@@ -1,12 +1,14 @@
 
-import WorkspacePage from "../../components/WorkspacePage";
-
 export default function Proposals() {
   return (
-    <WorkspacePage
-      role="freelancer"
-      title="Proposals"
-      description="Track your work, proposals, projects and earnings."
-    />
+    <section>
+      <h1>My Proposals</h1>
+      <p className="tx-section-subtitle">
+        Track your submitted proposals and review their status.
+      </p>
+      <div className="tx-stat-box" style={{ marginTop: 24 }}>
+        Your submitted proposals will appear here.
+      </div>
+    </section>
   );
 }

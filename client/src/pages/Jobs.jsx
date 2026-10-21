@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
-import Navbar from "../components/Navbar";
+
 import Footer from "../components/Footer";
 import JobCard from "../components/JobCard";
 import api from "../services/api";
@@ -70,7 +70,7 @@ const sampleJobsData = [
   },
 ];
 
-export default function Jobs() {
+export default function Jobs({ workspace = false }) {
   const [searchParams, setSearchParams] = useSearchParams();
   const initialSearch = searchParams.get("search") || "";
   const initialCategory = searchParams.get("category") || "All";
@@ -131,9 +131,7 @@ export default function Jobs() {
   };
 
   return (
-    <div className="tx-page-wrapper">
-      <Navbar />
-
+    <div className="tx-jobs-workspace">
       <main className="tx-main-content">
         {/* Header / Search Strip */}
         <section className="tx-section tx-section-light" style={{ padding: "40px 0" }}>
@@ -273,8 +271,7 @@ export default function Jobs() {
           </div>
         </section>
       </main>
-
-      <Footer />
+      {!workspace && <Footer />}
     </div>
   );
 }

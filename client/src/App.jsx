@@ -6,6 +6,9 @@ import {
   Link,
 } from "react-router-dom";
 
+import FreelancerLayout from "./components/FreelancerLayout";
+import FindWork from "./pages/freelancers/FindWork";
+import Proposals from "./pages/freelancers/Proposals";
 import { AuthProvider } from "./context/AuthContext";
 import useAuth from "./context/useAuth";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -84,10 +87,16 @@ function AppRoutes() {
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
 
+
       {/* Role-Protected Freelancer Workspace */}
       <Route element={<ProtectedRoute allowedRoles={["freelancer"]} />}>
-        <Route path="/freelancer/dashboard" element={<FreelancerDashboard />} />
+        <Route path="/freelancer" element={<FreelancerLayout />}>
+          <Route path="dashboard" element={<FreelancerDashboard />} />
+          <Route path="jobs" element={<FindWork />} />
+          <Route path="proposals" element={<Proposals />} />
+        </Route>
       </Route>
+
 
       {/* Role-Protected Client Workspace */}
       <Route element={<ProtectedRoute allowedRoles={["client"]} />}>

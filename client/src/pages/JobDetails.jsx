@@ -36,70 +36,105 @@ export default function JobDetails() {
   const [coverLetter, setCoverLetter] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [proposalSuccess, setProposalSuccess] = useState(false);
+  const [proposalError, setProposalError] = useState("");
+
 
   useEffect(() => {
+    let cancelled = false;
+
     api
       .get(`/jobs/${id}`)
       .then((res) => {
-        if (res.data?.job) {
-          setJob(res.data.job);
-          setBidAmount(res.data.job.budget || "");
+        if (cancelled) return;
+
+        const fetchedJob = res.data?.job;
+
+        if (fetchedJob) {
+          setJob(fetchedJob);
+          setBidAmount(fetchedJob.budget || "");
         } else {
-          setJob(fallbackJob);
-          setBidAmount(fallbackJob.budget);
+          setJob(null);
         }
       })
-      .catch(() => {
-        // Fallback to sample if ID is demo
-        setJob(fallbackJob);
-        setBidAmount(fallbackJob.budget);
+      .catch((error) => {
+        if (cancelled) return;
+
+        console.error("Failed to load job:", error.response?.data || error.message);
+        setJob(null);
       })
       .finally(() => {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       });
+
+    return () => {
+      cancelled = true;
+    };
   }, [id]);
+
 
   const handleApplyClick = () => {
     if (!isAuthenticated) {
       navigate("/login", { state: { from: { pathname: `/jobs/${id}` } } });
       return;
     }
-    if (user?.role === "client") {
-      alert("You are currently signed in as a Client. Only Freelancers can apply to jobs.");
+    if (user?.role !== "freelancer") {
+      alert("Only Freelancers can apply to jobs.");
       return;
     }
+
+    setProposalError("");
+    setProposalSuccess(false);
+
     setShowApplyModal(true);
   };
 
-  const handleProposalSubmit = (e) => {
+
+  const handleProposalSubmit = async (e) => {
     e.preventDefault();
-    if (!coverLetter.trim()) {
-      alert("Please provide a cover letter explaining your qualifications.");
+    setProposalError("");
+
+    if (user?.role !== "freelancer") {
+      setProposalError("Only freelancers can submit proposals.");
+      return;
+    }
+
+    if (!job?._id || job._id === "demo-details") {
+      setProposalError("This job is unavailable. Please refresh and try again.");
+      return;
+    }
+
+    const amount = Number(bidAmount);
+
+    if (!Number.isFinite(amount) || amount < 1) {
+      setProposalError("Enter a valid bid amount of at least 1.");
+      return;
+    }
+
+    if (coverLetter.trim().length < 20) {
+      setProposalError("Your cover letter must contain at least 20 characters.");
       return;
     }
 
     setSubmitting(true);
-    // Simulate proposal processing with persistent confirmation
-    setTimeout(() => {
-      setSubmitting(false);
+
+    try {
+      await api.post("/proposals", {
+        jobId: job._id,
+        bidAmount: amount,
+        duration,
+        coverLetter: coverLetter.trim(),
+      });
+
       setProposalSuccess(true);
-      // Store proposal in localStorage for Freelancer dashboard tracking
-      try {
-        const stored = JSON.parse(localStorage.getItem("talentx_proposals") || "[]");
-        stored.push({
-          jobId: job._id || id,
-          jobTitle: job.title,
-          bidAmount: Number(bidAmount),
-          duration,
-          coverLetter,
-          appliedAt: new Date().toISOString(),
-          status: "Pending Review",
-        });
-        localStorage.setItem("talentx_proposals", JSON.stringify(stored));
-      } catch (e) {
-        console.error(e);
-      }
-    }, 800);
+    } catch (error) {
+      const message =
+        error.response?.data?.message ||
+        "Unable to submit your proposal. Please try again.";
+
+      setProposalError(message);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (loading) {
@@ -413,6 +448,20 @@ export default function JobDetails() {
                       required
                     />
                   </div>
+                  {proposalError && (
+                    <p
+                      role="alert"
+                      style={{
+                        color: "#dc2626",
+                        background: "#fef2f2",
+                        padding: "12px",
+                        borderRadius: "8px",
+                        fontSize: "0.9rem",
+                      }}
+                    >
+                      {proposalError}
+                    </p>
+                  )}
 
                   <div style={{ display: "flex", gap: "12px", justifyContent: "flex-end", marginTop: "12px" }}>
                     <button

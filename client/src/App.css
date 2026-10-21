@@ -227,7 +227,8 @@
   gap: 12px;
 }
 
-.tx-guest-actions, .tx-user-menu {
+.tx-guest-actions,
+.tx-user-menu {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -346,9 +347,20 @@
 }
 
 @keyframes pulse {
-  0% { transform: scale(0.9); opacity: 0.7; }
-  50% { transform: scale(1.3); opacity: 1; }
-  100% { transform: scale(0.9); opacity: 0.7; }
+  0% {
+    transform: scale(0.9);
+    opacity: 0.7;
+  }
+
+  50% {
+    transform: scale(1.3);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(0.9);
+    opacity: 0.7;
+  }
 }
 
 .tx-hero-title {
@@ -681,7 +693,8 @@
   line-height: 1;
 }
 
-.tx-save-btn:hover, .tx-save-btn.saved {
+.tx-save-btn:hover,
+.tx-save-btn.saved {
   color: var(--tx-green);
 }
 
@@ -1543,13 +1556,17 @@
     gap: 32px;
   }
 
-  .tx-steps-grid, .tx-benefits-grid {
+  .tx-steps-grid,
+  .tx-benefits-grid {
     grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 768px) {
-  .tx-nav-links, .tx-guest-actions, .tx-user-menu {
+
+  .tx-nav-links,
+  .tx-guest-actions,
+  .tx-user-menu {
     display: none;
   }
 
@@ -1582,4 +1599,40 @@
   .tx-footer-top {
     grid-template-columns: 1fr;
   }
+}
+
+/* Marketplace displayed inside the Freelancer Workspace */
+.tx-jobs-workspace {
+  width: 100%;
+  min-width: 0;
+}
+
+.tx-jobs-workspace .tx-main-content {
+  width: 100%;
+  min-width: 0;
+}
+
+.tx-jobs-workspace .tx-section-light {
+  padding-top: 32px !important;
+  padding-bottom: 32px !important;
+}
+
+.tx-jobs-workspace .tx-container {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.freelancer-dashboard-content {
+  width: 100%;
+  min-width: 0;
+}
+
+.tx-dashboard-tabs {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 28px 0;
 }
