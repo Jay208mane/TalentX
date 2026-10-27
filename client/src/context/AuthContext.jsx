@@ -52,6 +52,11 @@ export function AuthProvider({ children }) {
     setUser(newUser);
   };
 
+  const updateUser = (updatedUser) => {
+    localStorage.setItem("talentx_user", JSON.stringify(updatedUser));
+    setUser(updatedUser);
+  };
+
   const logout = () => {
     localStorage.removeItem("talentx_token");
     localStorage.removeItem("talentx_user");
@@ -68,6 +73,7 @@ export function AuthProvider({ children }) {
       role: user?.role || null,
       login,
       logout,
+      updateUser,
     }),
     [user, token, loading]
   );

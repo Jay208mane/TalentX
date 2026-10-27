@@ -14,9 +14,19 @@ export default function JobCard({ job, onSaveToggle }) {
     year: "numeric"
   }) : "Recently posted";
 
-  const formattedBudget = job.budgetType === "hourly" 
-    ? `$${job.budget}/hr` 
-    : `$${Number(job.budget || 0).toLocaleString()}`;
+  const currency = job.budgetRange?.currency || "USD";
+  const formattedBudget = job.budgetRange?.minimum != null || job.budgetRange?.maximum != null
+    ? `${currency} ${job.budgetRange.minimum ?? "—"}–${job.budgetRange.maximum ?? "—"}`
+    : job.budgetType === "negotiable"
+      ? "Negotiable"
+      : job.budgetType === "hourly"
+        ? `${currency} ${job.budget ?? "Rate to discuss"}/hr`
+        : job.budget == null
+          ? "Terms to discuss"
+          : `${currency} ${Number(job.budget).toLocaleString()}`;
+
+  const paymentLabel = job.requirements?.paymentPreference ||
+    ({ hourly: "Hourly", milestone: "Milestone-based", negotiable: "Negotiable", fixed: "Fixed project price" }[job.budgetType] || "Project terms");
 
   const handleSave = (e) => {
     e.preventDefault();
@@ -36,8 +46,8 @@ export default function JobCard({ job, onSaveToggle }) {
           type="button"
           className={`tx-save-btn ${isSaved ? "saved" : ""}`}
           onClick={handleSave}
-          title={isSaved ? "Saved job" : "Save this job"}
-          aria-label={isSaved ? "Saved job" : "Save this job"}
+          title={isSaved ? "Saved project" : "Save this project"}
+          aria-label={isSaved ? "Saved project" : "Save this project"}
         >
           {isSaved ? "★" : "☆"}
         </button>
@@ -50,7 +60,7 @@ export default function JobCard({ job, onSaveToggle }) {
       <div className="tx-job-budget-row">
         <span className="tx-budget-amount">{formattedBudget}</span>
         <span className="tx-budget-type">
-          {job.budgetType === "hourly" ? "Hourly Rate" : "Fixed Price"}
+          {paymentLabel}
         </span>
         <span className="tx-badge-dot">•</span>
         <span className="tx-client-label">Client: {clientName}</span>
@@ -73,9 +83,7 @@ export default function JobCard({ job, onSaveToggle }) {
       )}
 
       <div className="tx-job-card-footer">
-        <span className="tx-verified-badge">
-          <span className="tx-check-icon">✓</span> Payment Verified
-        </span>
+        <span className="tx-client-label">{job.requirements?.projectType || "Freelance project"}</span>
         <Link to={`/jobs/${jobId}`} className="tx-btn tx-btn-subtle tx-btn-sm">
           View Details →
         </Link>

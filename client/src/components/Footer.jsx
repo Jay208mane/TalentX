@@ -36,7 +36,6 @@ export default function Footer() {
           <div className="tx-footer-col">
             <h4>For Freelancers</h4>
             <ul>
-              <li><Link to="/jobs">Find Work</Link></li>
               <li><a href="/#how-it-works">How to Get Hired</a></li>
               <li><Link to="/freelancer/dashboard">Freelancer Workspace</Link></li>
               <li><a href="/#skills">Popular In-Demand Skills</a></li>

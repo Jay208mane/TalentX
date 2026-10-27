@@ -4,7 +4,6 @@ import { NavLink, useNavigate } from "react-router-dom";
 const menus = {
   freelancer: [
     ["Dashboard", "/freelancer/dashboard"],
-    ["Find Work", "/freelancer/jobs"],
     ["My Proposals", "/freelancer/proposals"],
     ["My Projects", "/freelancer/projects"],
     ["Earnings", "/freelancer/earnings"],
@@ -12,8 +11,8 @@ const menus = {
   ],
   client: [
     ["Dashboard", "/client/dashboard"],
-    ["Post a Job", "/client/jobs/new"],
-    ["Manage Jobs", "/client/jobs"],
+    ["Create Project", "/client/jobs/new"],
+    ["Manage Project Listings", "/client/jobs"],
     ["Find Freelancers", "/client/freelancers"],
     ["Contracts", "/client/contracts"],
   ],

@@ -1,4 +1,19 @@
+const mongoose = require("mongoose");
 const Job = require("../models/job");
+
+const omitReferenceFileContents = (job) => {
+  if (!job) return job;
+  const publicJob = { ...job };
+  delete publicJob.sourceDraft;
+  if (!job.requirements?.referenceFiles) return publicJob;
+  return {
+    ...publicJob,
+    requirements: {
+      ...job.requirements,
+      referenceFiles: job.requirements.referenceFiles.map(({ name, mimeType }) => ({ name, mimeType })),
+    },
+  };
+};
 
 const createJob = async (req, res) => {
   try {
@@ -64,7 +79,7 @@ const getOpenJobs = async (req, res) => {
 
     return res.status(200).json({
       count: jobs.length,
-      jobs,
+      jobs: jobs.map(omitReferenceFileContents),
     });
   } catch (error) {
     console.error("Fetch jobs failed:", error.message);
@@ -83,7 +98,7 @@ const getMyJobs = async (req, res) => {
 
     return res.status(200).json({
       count: jobs.length,
-      jobs,
+      jobs: jobs.map(omitReferenceFileContents),
     });
   } catch (error) {
     console.error("Fetch client jobs failed:", error.message);
@@ -216,7 +231,7 @@ const closeMyJob = async (req, res) => {
 const getJobById = async (req, res) => {
   try {
     const job = await Job.findById(req.params.id)
-      .populate("client", "name email")
+      .populate("client", "name createdAt")
       .lean();
 
     if (!job) {
@@ -225,7 +240,7 @@ const getJobById = async (req, res) => {
       });
     }
 
-    return res.status(200).json({ job });
+    return res.status(200).json({ job: omitReferenceFileContents(job) });
   } catch (error) {
     if (error.name === "CastError") {
       return res.status(400).json({
@@ -241,6 +256,32 @@ const getJobById = async (req, res) => {
   }
 };
 
+const getJobReferenceFile = async (req, res) => {
+  try {
+    const fileIndex = Number(req.params.index);
+    if (!mongoose.isValidObjectId(req.params.id) || !Number.isInteger(fileIndex) || fileIndex < 0) {
+      return res.status(400).json({ message: "Invalid project reference file." });
+    }
+    const job = await Job.findOne({ _id: req.params.id, status: { $in: ["open", "in_progress"] } })
+      .select("requirements.referenceFiles status")
+      .lean();
+    const file = job?.requirements?.referenceFiles?.[fileIndex];
+    if (!file || typeof file.data !== "string") {
+      return res.status(404).json({ message: "Reference file not found." });
+    }
+    const encodedData = file.data.split(",")[1];
+    if (!encodedData) return res.status(404).json({ message: "Reference file not found." });
+    const safeName = String(file.name || "project-reference").replace(/[^a-zA-Z0-9._-]/g, "_");
+    res.setHeader("Content-Type", file.mimeType || "application/octet-stream");
+    res.setHeader("Content-Disposition", `attachment; filename="${safeName}"`);
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    return res.send(Buffer.from(encodedData, "base64"));
+  } catch (error) {
+    console.error("Fetch project reference file failed:", error.message);
+    return res.status(500).json({ message: "Unable to download the reference file." });
+  }
+};
+
 module.exports = {
   createJob,
   getOpenJobs,
@@ -248,4 +289,5 @@ module.exports = {
   getMyJobs,
   updateMyJob,
   closeMyJob,
+  getJobReferenceFile,
 };

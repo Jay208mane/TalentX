@@ -4,21 +4,9 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import useAuth from "../context/useAuth";
 import api from "../services/api";
+import { projectCategories } from "./client/projectCategories";
 import "../App.css";
 
-const fallbackJob = {
-  _id: "demo-details",
-  title: "Senior MERN Stack Architecture Redesign",
-  category: "Development",
-  description:
-    "We are seeking an experienced Full-Stack MERN engineer to review our existing application architecture, streamline React components, and optimize Express endpoints. The selected freelancer will work on improving user authentication, enhancing the client and freelancer dashboards, and ensuring top-notch code quality.\n\nKey Responsibilities:\n• Refactor frontend components into reusable architectural patterns\n• Connect real REST API endpoints with robust error handling\n• Validate responsive behavior on all viewports\n• Maintain clean coding standards and documentation",
-  budget: 950,
-  budgetType: "fixed",
-  skills: ["React 19", "Node.js", "Express", "MongoDB", "UI/UX", "Vite"],
-  client: { name: "Apex Global Labs", email: "client@example.com" },
-  createdAt: new Date().toISOString(),
-  deadline: new Date(Date.now() + 86400000 * 14).toISOString(),
-};
 
 export default function JobDetails() {
   const { id } = useParams();
@@ -59,7 +47,7 @@ export default function JobDetails() {
       .catch((error) => {
         if (cancelled) return;
 
-        console.error("Failed to load job:", error.response?.data || error.message);
+        console.error("Failed to load project:", error.response?.data || error.message);
         setJob(null);
       })
       .finally(() => {
@@ -78,7 +66,7 @@ export default function JobDetails() {
       return;
     }
     if (user?.role !== "freelancer") {
-      alert("Only Freelancers can apply to jobs.");
+      alert("Only freelancers can submit project proposals.");
       return;
     }
 
@@ -99,7 +87,7 @@ export default function JobDetails() {
     }
 
     if (!job?._id || job._id === "demo-details") {
-      setProposalError("This job is unavailable. Please refresh and try again.");
+      setProposalError("This project is unavailable. Please refresh and try again.");
       return;
     }
 
@@ -142,7 +130,7 @@ export default function JobDetails() {
       <div className="tx-page-wrapper">
         <Navbar />
         <main className="tx-main-content" style={{ display: "grid", placeItems: "center", minHeight: "50vh" }}>
-          <p style={{ color: "var(--tx-slate-500)" }}>Loading job details...</p>
+          <p style={{ color: "var(--tx-slate-500)" }}>Loading project details...</p>
         </main>
         <Footer />
       </div>
@@ -154,12 +142,12 @@ export default function JobDetails() {
       <div className="tx-page-wrapper">
         <Navbar />
         <main className="tx-main-content" style={{ textAlign: "center", padding: "80px 20px" }}>
-          <h2>Job Not Found</h2>
+          <h2>Project Not Found</h2>
           <p style={{ color: "var(--tx-slate-500)", marginBottom: "20px" }}>
-            The job you are looking for is no longer open or does not exist.
+            The project you are looking for is no longer open or does not exist.
           </p>
           <Link to="/jobs" className="tx-btn tx-btn-primary">
-            Browse All Jobs
+            Browse All Projects
           </Link>
         </main>
         <Footer />
@@ -168,10 +156,18 @@ export default function JobDetails() {
   }
 
   const clientName = typeof job.client === "object" ? job.client?.name : "Verified Client";
-  const formattedBudget =
-    job.budgetType === "hourly"
-      ? `$${job.budget} / hour`
-      : `$${Number(job.budget || 0).toLocaleString()} Fixed-Price`;
+  const apiBaseUrl = api.defaults.baseURL || "http://localhost:5000/api";
+  const currency = job.budgetRange?.currency || "USD";
+  const hasBudgetRange = job.budgetRange?.minimum != null || job.budgetRange?.maximum != null;
+  const formattedBudget = hasBudgetRange
+    ? `${currency} ${job.budgetRange.minimum ?? "—"} – ${job.budgetRange.maximum ?? "—"}`
+    : job.budgetType === "negotiable" || job.budget == null
+      ? "To be agreed"
+      : job.budgetType === "hourly"
+        ? `${currency} ${job.budget} / hour`
+        : `${currency} ${Number(job.budget).toLocaleString()}`;
+  const paymentPreference = job.requirements?.paymentPreference ||
+    ({ fixed: "Fixed Project Price", hourly: "Hourly", milestone: "Milestone-Based", negotiable: "Negotiable" }[job.budgetType] || "Project terms");
 
   return (
     <div className="tx-page-wrapper">
@@ -182,7 +178,7 @@ export default function JobDetails() {
           {/* Breadcrumb */}
           <div style={{ marginBottom: "24px", fontSize: "0.9rem", color: "var(--tx-slate-500)" }}>
             <Link to="/jobs" style={{ color: "var(--tx-green)", fontWeight: 600 }}>
-              ← Back to All Jobs
+              ← Back to All Projects
             </Link>{" "}
             / {job.category || "General"}
           </div>
@@ -195,7 +191,7 @@ export default function JobDetails() {
               alignItems: "start",
             }}
           >
-            {/* Main Job Information Column */}
+            {/* Main Project Information Column */}
             <div
               style={{
                 background: "var(--tx-white)",
@@ -215,7 +211,7 @@ export default function JobDetails() {
                   type="button"
                   className={`tx-save-btn ${isSaved ? "saved" : ""}`}
                   onClick={() => setIsSaved(!isSaved)}
-                  title={isSaved ? "Saved" : "Save Job"}
+                  title={isSaved ? "Saved" : "Save Project"}
                   style={{ fontSize: "1.6rem" }}
                 >
                   {isSaved ? "★" : "☆"}
@@ -235,7 +231,7 @@ export default function JobDetails() {
               >
                 <div>
                   <span style={{ fontSize: "0.8rem", color: "var(--tx-slate-500)", display: "block" }}>
-                    BUDGET
+                    PROJECT BUDGET
                   </span>
                   <strong style={{ fontSize: "1.15rem", color: "var(--tx-green-dark)" }}>
                     {formattedBudget}
@@ -244,10 +240,33 @@ export default function JobDetails() {
 
                 <div>
                   <span style={{ fontSize: "0.8rem", color: "var(--tx-slate-500)", display: "block" }}>
+                    PAYMENT PREFERENCE
+                  </span>
+                  <strong style={{ fontSize: "1.05rem", color: "var(--tx-slate-800)" }}>
+                    {paymentPreference}
+                  </strong>
+                </div>
+
+                {job.requirements?.projectType && (
+                  <div>
+                    <span style={{ fontSize: "0.8rem", color: "var(--tx-slate-500)", display: "block" }}>PROJECT TYPE</span>
+                    <strong style={{ fontSize: "1.05rem", color: "var(--tx-slate-800)" }}>{job.requirements.projectType}</strong>
+                  </div>
+                )}
+
+                {job.requirements?.experiencePreference && (
+                  <div>
+                    <span style={{ fontSize: "0.8rem", color: "var(--tx-slate-500)", display: "block" }}>EXPERIENCE PREFERENCE</span>
+                    <strong style={{ fontSize: "1.05rem", color: "var(--tx-slate-800)" }}>{job.requirements.experiencePreference}</strong>
+                  </div>
+                )}
+
+                <div>
+                  <span style={{ fontSize: "0.8rem", color: "var(--tx-slate-500)", display: "block" }}>
                     POSTED ON
                   </span>
                   <strong style={{ fontSize: "1.05rem", color: "var(--tx-slate-800)" }}>
-                    {new Date(job.createdAt).toLocaleDateString()}
+                    {job.createdAt ? new Date(job.createdAt).toLocaleDateString() : "Recently posted"}
                   </strong>
                 </div>
 
@@ -261,18 +280,62 @@ export default function JobDetails() {
                 </div>
               </div>
 
-              {/* Description */}
+              {/* Project requirements */}
               <div style={{ marginBottom: "32px" }}>
-                <h3 style={{ fontSize: "1.2rem", marginBottom: "12px" }}>Summary & Requirements</h3>
+                <h3 style={{ fontSize: "1.2rem", marginBottom: "12px" }}>Project Requirements</h3>
                 <div style={{ whiteSpace: "pre-line", color: "var(--tx-slate-700)", lineHeight: 1.7, fontSize: "1.02rem" }}>
                   {job.description}
                 </div>
               </div>
 
-              {/* Required Skills */}
+              {job.requirements?.generated && (
+                <div style={{ display: "grid", gap: 18, marginBottom: 28 }}>
+                  {[
+                    ["overview", "Project overview"],
+                    ["problemStatement", "Problem statement"],
+                    ["objectives", "Objectives"],
+                    ["scopeOfWork", "Scope of work"],
+                    ["tasksAndMilestones", "Tasks and milestones"],
+                    ["functionalRequirements", "Functional requirements"],
+                    ["nonFunctionalRequirements", "Non-functional requirements"],
+                    ["testingAcceptanceCriteria", "Testing and acceptance criteria"],
+                    ["estimatedTimeline", "Estimated timeline"],
+                    ["assumptions", "Assumptions to clarify"],
+                    ["dependencies", "Dependencies"],
+                    ["openQuestions", "Questions for the client"],
+                  ].map(([key, label]) => {
+                    const value = job.requirements.generated[key];
+                    if (!value || (Array.isArray(value) && value.length === 0)) return null;
+                    return (
+                      <section key={key}>
+                        <h3 style={{ fontSize: "1.05rem", marginBottom: 6 }}>{label}</h3>
+                        {Array.isArray(value)
+                          ? <ul style={{ paddingLeft: 22 }}>{value.map((item, index) => <li key={`${key}-${index}`} style={{ marginBottom: 4 }}>{item}</li>)}</ul>
+                          : <p style={{ whiteSpace: "pre-line", lineHeight: 1.65 }}>{value}</p>}
+                      </section>
+                    );
+                  })}
+                </div>
+              )}
+
+              {Object.values(job.requirements?.categoryDetails || {}).some(Boolean) && (
+                <section style={{ display: "grid", gap: 12, marginBottom: 24 }}>
+                  <h3 style={{ fontSize: "1.05rem", margin: 0 }}>Category-specific details</h3>
+                  {(projectCategories[job.category]?.fields || []).map((field) => {
+                    const value = job.requirements.categoryDetails[field.key];
+                    return value ? (
+                      <div key={field.key}>
+                        <strong>{field.label}</strong>
+                        <p style={{ whiteSpace: "pre-line", lineHeight: 1.65, margin: "4px 0 0" }}>{value}</p>
+                      </div>
+                    ) : null;
+                  })}
+                </section>
+              )}
+
               {job.skills && job.skills.length > 0 && (
                 <div style={{ marginBottom: "28px" }}>
-                  <h3 style={{ fontSize: "1.15rem", marginBottom: "12px" }}>Skills & Expertise</h3>
+                  <h3 style={{ fontSize: "1.15rem", marginBottom: "12px" }}>Required Skills</h3>
                   <div className="tx-job-skills">
                     {job.skills.map((skill, index) => (
                       <span key={index} className="tx-skill-tag" style={{ fontSize: "0.9rem", padding: "6px 14px" }}>
@@ -281,6 +344,28 @@ export default function JobDetails() {
                     ))}
                   </div>
                 </div>
+              )}
+              {job.requirements?.tools?.length > 0 && (
+                <section style={{ marginBottom: 24 }}>
+                  <h3 style={{ fontSize: "1.15rem", marginBottom: 12 }}>Preferred Tools and Technologies</h3>
+                  <p>{job.requirements.tools.join(", ")}</p>
+                </section>
+              )}
+              {job.requirements?.referenceLinks?.length > 0 && (
+                <section style={{ marginBottom: 24 }}>
+                  <h3 style={{ fontSize: "1.15rem", marginBottom: 12 }}>Reference Links</h3>
+                  <ul>{job.requirements.referenceLinks.map((link) => <li key={link}><a href={link} target="_blank" rel="noreferrer">{link}</a></li>)}</ul>
+                </section>
+              )}
+              {job.requirements?.referenceFiles?.length > 0 && (
+                <section style={{ marginBottom: 24 }}>
+                  <h3 style={{ fontSize: "1.15rem", marginBottom: 12 }}>Reference Files</h3>
+                  <ul>{job.requirements.referenceFiles.map((file, index) => (
+                    <li key={`${file.name}-${index}`}>
+                      <a href={`${apiBaseUrl}/jobs/${job._id}/references/${index}`}>{file.name}</a>
+                    </li>
+                  ))}</ul>
+                </section>
               )}
             </div>
 
@@ -302,7 +387,7 @@ export default function JobDetails() {
                   onClick={handleApplyClick}
                   style={{ marginBottom: "12px" }}
                 >
-                  Apply Now ↗
+                  Submit a Proposal ↗
                 </button>
 
                 <button
@@ -310,11 +395,11 @@ export default function JobDetails() {
                   className="tx-btn tx-btn-outline tx-btn-block"
                   onClick={() => setIsSaved(!isSaved)}
                 >
-                  {isSaved ? "Saved Job ✓" : "Save Job for Later"}
+                  {isSaved ? "Saved Project ✓" : "Save Project for Later"}
                 </button>
 
                 <p style={{ fontSize: "0.82rem", color: "var(--tx-slate-500)", textAlign: "center", marginTop: "14px" }}>
-                  Required Connects: 2 • Available to submit
+                  Submit a proposal with your approach, timeline, and proposed payment terms.
                 </p>
               </div>
 
@@ -332,18 +417,17 @@ export default function JobDetails() {
                   <div className="tx-avatar-badge" style={{ width: "42px", height: "42px" }}>
                     {clientName[0]}
                   </div>
-                  <div>
-                    <strong>{clientName}</strong>
-                    <div style={{ fontSize: "0.82rem", color: "var(--tx-green-dark)", fontWeight: 600 }}>
-                      ✓ Payment Method Verified
-                    </div>
-                  </div>
+                  <div><strong>{clientName}</strong></div>
                 </div>
 
                 <div style={{ fontSize: "0.88rem", color: "var(--tx-slate-600)", display: "flex", flexDirection: "column", gap: "8px", marginTop: "14px", borderTop: "1px solid var(--tx-slate-100)", paddingTop: "14px" }}>
-                  <div><strong>Member since:</strong> 2026</div>
-                  <div><strong>Location:</strong> India / Global</div>
-                  <div><strong>Job Postings:</strong> Active</div>
+                  {job.client?.createdAt && (
+                    <div><strong>Member since:</strong> {new Date(job.client.createdAt).toLocaleDateString(undefined, { month: "short", year: "numeric" })}</div>
+                  )}
+                  {job.deadline && (
+                    <div><strong>Target deadline:</strong> {new Date(job.deadline).toLocaleDateString()}</div>
+                  )}
+                  <div><strong>Project listing status:</strong> <span style={{ textTransform: "capitalize" }}>{job.status}</span></div>
                 </div>
               </div>
             </div>
@@ -410,6 +494,9 @@ export default function JobDetails() {
                     <input
                       id="bid"
                       type="number"
+                      min="1"
+                      max="100000000"
+                      step="0.01"
                       className="tx-input"
                       value={bidAmount}
                       onChange={(e) => setBidAmount(e.target.value)}

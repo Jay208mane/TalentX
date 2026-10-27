@@ -35,14 +35,6 @@ export default function Navbar() {
         {/* Desktop Navigation Links */}
         <nav className="tx-nav-links" aria-label="Main Navigation">
           <NavLink
-            to="/jobs"
-            className={({ isActive }) =>
-              `tx-nav-link ${isActive ? "active" : ""}`
-            }
-          >
-            Find Work
-          </NavLink>
-          <NavLink
             to="/freelancers"
             className={({ isActive }) =>
               `tx-nav-link ${isActive ? "active" : ""}`
@@ -106,13 +98,6 @@ export default function Navbar() {
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
         <div className="tx-mobile-drawer">
-          <NavLink
-            to="/jobs"
-            className="tx-mobile-link"
-            onClick={() => setMobileMenuOpen(false)}
-          >
-            Find Work
-          </NavLink>
           <NavLink
             to="/freelancers"
             className="tx-mobile-link"

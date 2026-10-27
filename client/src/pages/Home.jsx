@@ -189,7 +189,7 @@ export default function Home() {
 
                 <p className="tx-hero-desc">
                   TalentX seamlessly bridges ambitious businesses and top-tier
-                  independent freelancers for high-impact contracts, flexible jobs,
+                  independent freelancers for high-impact projects and flexible collaborations,
                   and verified project collaboration.
                 </p>
 
@@ -203,7 +203,7 @@ export default function Home() {
                       }`}
                       onClick={() => setSearchTab("jobs")}
                     >
-                      Find Jobs
+                      Explore Projects
                     </button>
                     <button
                       type="button"
@@ -224,7 +224,7 @@ export default function Home() {
                         className="tx-search-input"
                         placeholder={
                           searchTab === "jobs"
-                            ? "Search by job title, skill, or keyword..."
+                            ? "Search project title, skill, or keyword..."
                             : "Search freelancers by skill, specialty, or name..."
                         }
                         value={searchQuery}
@@ -301,7 +301,7 @@ export default function Home() {
                       className="tx-btn tx-btn-outline tx-btn-sm tx-btn-block"
                       style={{ marginTop: "12px" }}
                     >
-                      Browse All Open Jobs →
+                      Browse All Projects →
                     </Link>
                   </div>
                 </div>
@@ -359,7 +359,7 @@ export default function Home() {
                 </p>
               </div>
               <Link to="/jobs" className="tx-btn tx-btn-outline">
-                View All Jobs →
+                View All Projects →
               </Link>
             </div>
 
@@ -436,7 +436,7 @@ export default function Home() {
               <div className="tx-steps-grid">
                 <div className="tx-step-card">
                   <div className="tx-step-number">1</div>
-                  <h3>Post a Job with Clear Scope</h3>
+                  <h3>Post a Project with Clear Scope</h3>
                   <p>
                     Describe your requirements, required skills, and set a fixed
                     or hourly budget. Receive applications from talented professionals.
@@ -471,9 +471,9 @@ export default function Home() {
                 </div>
                 <div className="tx-step-card">
                   <div className="tx-step-number">2</div>
-                  <h3>Find & Apply to Jobs</h3>
+                  <h3>Explore & Propose on Projects</h3>
                   <p>
-                    Filter jobs matching your skillset, submit tailored proposals,
+                    Filter projects matching your skills, submit tailored proposals,
                     and connect directly with hiring managers.
                   </p>
                 </div>
@@ -524,7 +524,7 @@ export default function Home() {
                 <div className="tx-benefit-icon">🤝</div>
                 <h3>Dedicated Workspaces</h3>
                 <p>
-                  Tailored dashboards provide customized tools for posting jobs,
+                  Tailored dashboards provide customized tools for publishing projects,
                   submitting proposals, and monitoring accounts seamlessly.
                 </p>
               </div>

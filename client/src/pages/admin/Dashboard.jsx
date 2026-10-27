@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import useAuth from "../../context/useAuth";
 import api from "../../services/api";
 import "../../App.css";
@@ -7,8 +7,15 @@ import "../../App.css";
 export default function AdminDashboard() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const [activeTab, setActiveTab] = useState("overview"); // 'overview', 'users', 'activity'
+  const [activeTab, setActiveTab] = useState(() => {
+    if (location.pathname === "/admin/users") return "users";
+    if (["/admin/activity", "/admin/login-activity"].includes(location.pathname)) {
+      return "activity";
+    }
+    return "overview";
+  });
   const [stats, setStats] = useState({
     totalUsers: 0,
     freelancers: 0,
@@ -152,7 +159,7 @@ export default function AdminDashboard() {
             <span>Login Audit Activity</span>
           </button>
 
-          <Link to="/jobs" className="tx-sidebar-btn">
+          <Link to="/admin/marketplace" className="tx-sidebar-btn">
             <span>🔍</span>
             <span>View Marketplace</span>
           </Link>
@@ -291,7 +298,7 @@ export default function AdminDashboard() {
                       <strong>{stats.totalJobs}</strong>
                     </div>
                     <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid var(--tx-slate-100)", paddingBottom: "8px" }}>
-                      <span>Active Open Jobs</span>
+                      <span>Open Project Listings</span>
                       <strong style={{ color: "var(--tx-green-dark)" }}>{stats.openJobs}</strong>
                     </div>
                     <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid var(--tx-slate-100)", paddingBottom: "8px" }}>

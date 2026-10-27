@@ -102,6 +102,9 @@ export default function Login() {
           <div className="tx-form-group">
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <label htmlFor="password">Password</label>
+              <Link to="/forgot-password" className="tx-auth-inline-link">
+                Forgot Password?
+              </Link>
             </div>
             <div className="tx-password-wrap">
               <input

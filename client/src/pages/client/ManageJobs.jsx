@@ -6,7 +6,7 @@ export default function ManageJobs() {
     <WorkspacePage
       role="client"
       title="Manage Jobs"
-      description="View and manage your job postings and applications."
+      description="View and manage your project listings and proposals."
     />
   );
 }

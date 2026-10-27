@@ -1,12 +1,6 @@
 
-import WorkspacePage from "../../components/WorkspacePage";
+import ProjectsList from "../ProjectsList";
 
 export default function Projects() {
-  return (
-    <WorkspacePage
-      role="freelancer"
-      title="Projects"
-      description="Track your work, proposals, projects and earnings."
-    />
-  );
+  return <ProjectsList embedded />;
 }

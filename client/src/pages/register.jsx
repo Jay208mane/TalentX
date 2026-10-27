@@ -136,7 +136,7 @@ export default function Register() {
                 onKeyDown={(e) => e.key === "Enter" && handleRoleSelect("freelancer")}
               >
                 <strong>Work as a Freelancer</strong>
-                <span>Find jobs & build contracts</span>
+                <span>Find projects & build your portfolio</span>
               </div>
 
               <div

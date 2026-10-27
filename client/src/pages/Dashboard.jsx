@@ -5,7 +5,6 @@ import "../App.css";
 
 const menuItems = [
   { label: "Overview", icon: "▦", path: "/dashboard" },
-  { label: "Find Work", icon: "⌕", path: "/jobs" },
   { label: "My Projects", icon: "▤", path: "/projects" },
   { label: "Messages", icon: "✉", path: "/messages" },
   { label: "My Profile", icon: "♙", path: "/profile" },

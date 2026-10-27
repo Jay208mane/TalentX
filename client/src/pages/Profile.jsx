@@ -3,24 +3,32 @@ import { Link, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import useAuth from "../context/useAuth";
+import api from "../services/api";
+import AiProfileEnhancer from "../components/AiProfileEnhancer";
 import "../App.css";
 
 export default function Profile() {
-  const { user, login, token } = useAuth();
+  const { user, updateUser } = useAuth();
   const navigate = useNavigate();
 
   const [name, setName] = useState(user?.name || "");
   const [title, setTitle] = useState(user?.title || "Senior Full-Stack Specialist");
-  const [hourlyRate, setHourlyRate] = useState(user?.hourlyRate || 45);
+  const [hourlyRate, setHourlyRate] = useState(user?.hourlyRate ?? 45);
+  const [experienceLevel, setExperienceLevel] = useState(user?.experienceLevel || "intermediate");
+  const [location, setLocation] = useState(user?.location || "Remote");
   const [bio, setBio] = useState(
     user?.bio ||
       "Experienced independent professional delivering modern, scalable web applications with MERN stack, clean architecture, and responsive user experiences."
   );
   const [skills, setSkills] = useState(
-    user?.skills || ["React", "Node.js", "Express", "MongoDB", "JavaScript"]
+    Array.isArray(user?.skills) && user.skills.length > 0
+      ? user.skills
+      : ["React", "Node.js", "Express", "MongoDB", "JavaScript"]
   );
   const [newSkill, setNewSkill] = useState("");
   const [savedSuccess, setSavedSuccess] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
 
   const handleAddSkill = (e) => {
     e.preventDefault();
@@ -34,22 +42,45 @@ export default function Profile() {
     setSkills(skills.filter((s) => s !== skillToRemove));
   };
 
-  const handleSaveProfile = (e) => {
-    e.preventDefault();
-    const updatedUser = {
-      ...user,
-      name,
-      title,
-      hourlyRate: Number(hourlyRate),
-      bio,
-      skills,
-    };
-
-    if (token) {
-      login(token, updatedUser);
+  const handleApplyAiEnhancement = (enhancement) => {
+    if (enhancement.title) setTitle(enhancement.title);
+    if (enhancement.bio) setBio(enhancement.bio);
+    if (Array.isArray(enhancement.skills) && enhancement.skills.length > 0) {
+      setSkills(Array.from(new Set([...skills, ...enhancement.skills])));
     }
-    setSavedSuccess(true);
-    setTimeout(() => setSavedSuccess(false), 3000);
+  };
+
+  const handleSaveProfile = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    setSaveError("");
+    setSavedSuccess(false);
+
+    try {
+      const payload = {
+        name: name.trim(),
+        title: title.trim(),
+        hourlyRate: Number(hourlyRate),
+        experienceLevel,
+        location: location.trim(),
+        bio: bio.trim(),
+        skills,
+      };
+
+      const res = await api.put("/auth/profile", payload);
+      if (res.data?.success && res.data.user) {
+        if (updateUser) {
+          updateUser(res.data.user);
+        }
+        setSavedSuccess(true);
+        setTimeout(() => setSavedSuccess(false), 3500);
+      }
+    } catch (err) {
+      console.error("Save profile failed:", err);
+      setSaveError(err.response?.data?.message || "Failed to save profile. Please try again.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const dashboardPath =
@@ -95,9 +126,35 @@ export default function Profile() {
               </span>
             </div>
 
+            {/* AI Profile Enhancer Component */}
+            <AiProfileEnhancer
+              currentProfile={{
+                name,
+                title,
+                bio,
+                skills,
+                experienceLevel,
+                hourlyRate,
+                profileScore: user?.profileScore,
+              }}
+              onApplyEnhancement={handleApplyAiEnhancement}
+              onProfileUpdated={(updated) => {
+                if (updateUser) updateUser(updated);
+                if (updated.title) setTitle(updated.title);
+                if (updated.bio) setBio(updated.bio);
+                if (updated.skills) setSkills(updated.skills);
+              }}
+            />
+
+            {saveError && (
+              <div className="tx-alert tx-alert-danger" style={{ marginBottom: "20px" }}>
+                {saveError}
+              </div>
+            )}
+
             {savedSuccess && (
               <div className="tx-alert tx-alert-success" style={{ marginBottom: "24px" }}>
-                <span>✓</span> Profile information saved successfully!
+                <span>✓</span> Profile information saved successfully to database!
               </div>
             )}
 
@@ -129,30 +186,58 @@ export default function Profile() {
                 </div>
               </div>
 
-              {/* Title & Rate */}
-              <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "20px" }}>
+              {/* Title, Rate & Experience */}
+              <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr", gap: "16px" }}>
                 <div className="tx-form-group">
-                  <label htmlFor="title">Professional Title</label>
+                  <label htmlFor="title">Professional Headline / Title</label>
                   <input
                     id="title"
                     type="text"
                     className="tx-input"
-                    placeholder="e.g. Full-Stack MERN Architect & Consultant"
+                    placeholder="e.g. Senior Full-Stack MERN Architect"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                   />
                 </div>
 
                 <div className="tx-form-group">
-                  <label htmlFor="rate">Hourly Rate ($ USD)</label>
+                  <label htmlFor="rate">Hourly Rate ($/hr)</label>
                   <input
                     id="rate"
                     type="number"
+                    min="0"
+                    max="1000"
                     className="tx-input"
                     value={hourlyRate}
                     onChange={(e) => setHourlyRate(e.target.value)}
                   />
                 </div>
+
+                <div className="tx-form-group">
+                  <label htmlFor="level">Experience Level</label>
+                  <select
+                    id="level"
+                    className="tx-input"
+                    value={experienceLevel}
+                    onChange={(e) => setExperienceLevel(e.target.value)}
+                  >
+                    <option value="entry">Entry Level</option>
+                    <option value="intermediate">Intermediate</option>
+                    <option value="expert">Senior / Expert</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="tx-form-group">
+                <label htmlFor="location">Location / Working Timezone</label>
+                <input
+                  id="location"
+                  type="text"
+                  className="tx-input"
+                  placeholder="e.g. Remote (UTC+5:30), Mumbai, India"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                />
               </div>
 
               {/* Bio / Overview */}
@@ -216,8 +301,8 @@ export default function Profile() {
                 >
                   Cancel
                 </button>
-                <button type="submit" className="tx-btn tx-btn-primary">
-                  Save Changes
+                <button type="submit" className="tx-btn tx-btn-primary" disabled={saving}>
+                  {saving ? "Saving Changes..." : "Save Changes"}
                 </button>
               </div>
             </form>

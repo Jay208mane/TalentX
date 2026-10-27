@@ -6,6 +6,9 @@ const {
     createProposal,
     getMyProposals,
     getJobProposals,
+    getReceivedProposals,
+    reviewProposal,
+    withdrawMyProposal,
 } = require("../controllers/proposalController");
 
 const {
@@ -27,6 +30,29 @@ router.get(
     protect,
     allowRoles("freelancer"),
     getMyProposals
+);
+
+// Client views all proposals for jobs they own
+router.get(
+    "/received",
+    protect,
+    allowRoles("client"),
+    getReceivedProposals
+);
+
+router.patch(
+    "/:proposalId/withdraw",
+    protect,
+    allowRoles("freelancer"),
+    withdrawMyProposal
+);
+
+// Job owners accept or reject a pending proposal
+router.patch(
+    "/:proposalId/decision",
+    protect,
+    allowRoles("client"),
+    reviewProposal
 );
 
 // Client views proposals for a specific job

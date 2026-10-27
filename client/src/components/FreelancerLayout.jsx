@@ -15,9 +15,11 @@ export default function FreelancerLayout() {
 
     const menu = [
         { label: "Dashboard Overview", path: "/freelancer/dashboard", icon: "▦" },
-        { label: "Find Work", path: "/freelancer/jobs", icon: "⌕" },
         { label: "My Proposals", path: "/freelancer/proposals", icon: "▤" },
-        { label: "My Profile", path: "/profile", icon: "♟" },
+        { label: "My Projects", path: "/freelancer/projects", icon: "📁" },
+        { label: "Chat / Messages", path: "/messages", icon: "💬" },
+        { label: "Payment Settings", path: "/freelancer/payment-settings", icon: "💳" },
+        { label: "My Profile", path: "/freelancer/profile", icon: "♟" },
     ];
 
     return (
